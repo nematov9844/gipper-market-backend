@@ -6,11 +6,7 @@
   "scripts": {
     "start": "node api/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "json-server": "^0.17.1",
-    "json-server-auth": "^2.1.0"
+  "dependencies": {
+    "json-server": "^0.17.4"
   }
 }
