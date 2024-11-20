@@ -1,31 +1,40 @@
-// See https://github.com/typicode/json-server#module
-const jsonServer = require('json-server')
+const jsonServer = require('json-server');
+const server = jsonServer.create();
+const router = jsonServer.router('db.json');
+const middlewares = jsonServer.defaults();
 
-const server = jsonServer.create()
+// Tokenni tekshirish uchun middleware
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // "Bearer <token>"
+    const validToken = "your-secret-token"; // Tokenni bu yerda o'zgartiring
 
-// Uncomment to allow write operations
-// const fs = require('fs')
-// const path = require('path')
-// const filePath = path.join('db.json')
-// const data = fs.readFileSync(filePath, "utf-8");
-// const db = JSON.parse(data);
-// const router = jsonServer.router(db)
+    if (!token) {
+        return res.status(401).json({ message: 'Token required' });
+    }
 
-// Comment out to allow write operations
-const router = jsonServer.router('db.json')
+    if (token !== validToken) {
+        return res.status(403).json({ message: 'Invalid token' });
+    }
 
-const middlewares = jsonServer.defaults()
+    next(); // Token to‘g‘ri bo‘lsa, keyingi middleware'ga o‘tadi
+};
 
-server.use(middlewares)
-// Add this before server.use(router)
+server.use(middlewares);
+
+// Tokenni barcha API yo‘llariga qo‘llash
+server.use('/api', verifyToken);
+
+// URL'larni qayta yozish
 server.use(jsonServer.rewriter({
     '/api/*': '/$1',
     '/blog/:resource/:id/show': '/:resource/:id'
-}))
-server.use(router)
-server.listen(3000, () => {
-    console.log('JSON Server is running')
-})
+}));
 
-// Export the Server API
-module.exports = server
+server.use(router);
+
+server.listen(3000, () => {
+    console.log('JSON Server is running');
+});
+
+module.exports = server;
